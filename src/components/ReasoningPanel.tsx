@@ -275,6 +275,30 @@ export function ReasoningPanel() {
           </div>
         </div>
 
+        {state.documents.length > 0 && (
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+            <h3 className="font-medium text-gray-900 dark:text-white mb-3">
+              Available Documents
+            </h3>
+            <div className="space-y-2">
+              {state.documents.slice(0, 8).map((doc) => (
+                <div key={doc.id} className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400 truncate">
+                    {doc.name.replace(/\.(txt|docx|pdf)$/, '')}
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-500">
+                    {doc.chunks} chunks
+                  </span>
+                </div>
+              ))}
+              {state.documents.length > 8 && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                  +{state.documents.length - 8} more documents
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {state.reasoning && !state.reasoning.orchestrationMode && state.reasoning.retrievedChunks && (
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
