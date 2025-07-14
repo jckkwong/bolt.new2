@@ -2,6 +2,10 @@ import { config } from '../config/config';
 import type { Document } from '../types';
 import { VectorDatabase, VectorChunk } from './vectorDatabase';
 import { OpenAIService } from './openai';
+import * as pdfjs from 'pdfjs-dist';
+
+// Set up PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = '/node_modules/pdfjs-dist/build/pdf.worker.mjs';
 
 export class DocumentProcessor {
   private vectorDb: VectorDatabase;

@@ -3,10 +3,7 @@ import type { Document } from '../types';
 import { VectorDatabase, VectorChunk } from './vectorDatabase';
 import { OpenAIService } from './openai';
 import * as mammoth from 'mammoth';
-import * as pdfjs from 'pdfjs-dist';
-
-// Set up PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = '/node_modules/pdfjs-dist/build/pdf.worker.mjs';
+import * as pdfParse from 'pdf-parse';
 
 export class DocumentLoader {
   private vectorDb: VectorDatabase;
