@@ -71,13 +71,19 @@ export class DocumentLoader {
           console.log(`Document processed: ${filename}, chunks: ${document.chunks}`);
           return document;
         } catch (error) {
-          console.error(`Failed to load document ${filename}:`, error);
-          return null;
+          console.warn(`Skipping document ${filename} due to error:`, error);
+          return null; // Return null for failed documents, they will be filtered out
         }
       });
 
       const results = await Promise.all(documentPromises);
       const successfulDocuments = results.filter((doc): doc is Document => doc !== null);
+      
+      if (successfulDocuments.length === 0) {
+        console.warn('No documents were successfully loaded');
+      } else {
+        console.log(`Successfully loaded ${successfulDocuments.length} out of ${documentFiles.length} documents`);
+      }
       
       documents.push(...successfulDocuments);
 
@@ -122,7 +128,13 @@ export class DocumentLoader {
 
   private async loadDocumentContent(filename: string): Promise<string> {
     console.log(`Fetching document: /documents/${filename}`);
-    const response = await fetch(`/documents/${filename}`);
+    
+    let response: Response;
+    try {
+      response = await fetch(`/documents/${filename}`);
+    } catch (error) {
+      throw new Error(`Network error loading ${filename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
     
     if (!response.ok) {
       console.error(`Failed to fetch ${filename}: ${response.status} ${response.statusText}`);
@@ -134,17 +146,35 @@ export class DocumentLoader {
     
     if (extension === 'docx') {
       // Handle Word documents
-      const arrayBuffer = await response.arrayBuffer();
-      console.log(`Extracting text from ${filename}, size: ${arrayBuffer.byteLength} bytes`);
-      const result = await mammoth.extractRawText({ arrayBuffer });
-      console.log(`Extracted ${result.value.length} characters from ${filename}`);
-      return result.value;
+      try {
+        const arrayBuffer = await response.arrayBuffer();
+        console.log(`Extracting text from ${filename}, size: ${arrayBuffer.byteLength} bytes`);
+        
+        if (arrayBuffer.byteLength === 0) {
+          throw new Error(`Document ${filename} is empty (0 bytes)`);
+        }
+        
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        console.log(`Extracted ${result.value.length} characters from ${filename}`);
+        
+        if (!result.value || result.value.trim().length === 0) {
+          throw new Error(`Document ${filename} contains no extractable text`);
+        }
+        
+        return result.value;
+      } catch (error) {
+        throw new Error(`Failed to process DOCX file ${filename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
     } else if (extension === 'pdf') {
       // Handle PDF documents
-      const arrayBuffer = await response.arrayBuffer();
-      console.log(`Extracting text from PDF ${filename}, size: ${arrayBuffer.byteLength} bytes`);
-      
       try {
+        const arrayBuffer = await response.arrayBuffer();
+        console.log(`Extracting text from PDF ${filename}, size: ${arrayBuffer.byteLength} bytes`);
+        
+        if (arrayBuffer.byteLength === 0) {
+          throw new Error(`PDF ${filename} is empty (0 bytes)`);
+        }
+        
         const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
         let text = '';
         
@@ -165,14 +195,22 @@ export class DocumentLoader {
         
         return text;
       } catch (error) {
-        console.error(`Error extracting text from PDF ${filename}:`, error);
         throw new Error(`Failed to extract text from PDF ${filename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     } else {
       // Handle text files
-      const text = await response.text();
-      console.log(`Loaded ${text.length} characters from ${filename}`);
-      return text;
+      try {
+        const text = await response.text();
+        console.log(`Loaded ${text.length} characters from ${filename}`);
+        
+        if (!text || text.trim().length === 0) {
+          throw new Error(`Text file ${filename} is empty or contains no content`);
+        }
+        
+        return text;
+      } catch (error) {
+        throw new Error(`Failed to load text file ${filename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
     }
   }
 
