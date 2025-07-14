@@ -71,9 +71,9 @@ export function useRAG() {
           dispatch({ type: 'SET_VECTOR_DB_STATUS', payload: 'connected' });
           
           hasInitialized = true;
-          console.log(`Knowledge base initialized with ${vdb!.getChunkCount()} chunks`);
+          console.log(`✅ Vectorization complete - Knowledge base ready with ${vdb!.getChunkCount()} chunks`);
         } catch (error) {
-          console.error('Error initializing knowledge base:', error);
+          console.error('❌ Vectorization failed:', error);
           dispatch({ 
             type: 'SET_ERROR', 
             payload: error instanceof Error ? error.message : 'Failed to initialize knowledge base' 
