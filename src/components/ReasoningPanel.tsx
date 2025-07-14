@@ -186,7 +186,7 @@ export function ReasoningPanel() {
                       </div>
                       {result.chunks.length > 0 ? (
                         <div className="space-y-2">
-                          {result.chunks.slice(0, 3).map((chunk, chunkIndex) => (
+                          {result.chunks.slice(0, 2).map((chunk, chunkIndex) => (
                             <div key={chunkIndex} className="text-xs bg-gray-50 dark:bg-gray-900 p-2 rounded border">
                               <div className="flex items-center justify-between mb-1">
                                 <span className="font-medium text-blue-600 dark:text-blue-400">
@@ -201,9 +201,9 @@ export function ReasoningPanel() {
                               </p>
                             </div>
                           ))}
-                          {result.chunks.length > 3 && (
+                          {result.chunks.length > 2 && (
                             <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                              +{result.chunks.length - 3} more sources
+                              +{result.chunks.length - 2} more sources
                             </p>
                           )}
                         </div>

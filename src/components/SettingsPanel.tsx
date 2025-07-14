@@ -197,7 +197,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 <input
                   type="number"
                   min="1"
-                  max="15"
+                  max="10"
                   value={localSettings.retrievalCount}
                   onChange={(e) => setLocalSettings({ 
                     ...localSettings, 
