@@ -108,25 +108,14 @@ export class VectorDatabase {
         }
       }
 
-      // Create a simple hash based on file list and timestamp
-      const fileList = [
-        'Claude.docx',
-        'DeepSeek.docx', 
-        'Combined using Claude.docx',
-        'Combined using Gemini.docx',
-        'GPT.docx',
-        'Gemini.docx',
-        'Moller D. Guide to Cybersecurity in Digital Transformation...Best Practices 2023.pdf',
-        'Singh T. Digital Resilience, Cybersecurity and Supply Chains 2025.pdf',
-        'Dunham K. Cyber CISO Marksmanship. Hitting the Mark in Cybersecurity...2025.pdf',
-        'Baker D. A CISO Guide to Cyber Resilience. A how-to guide for every CISO...2024.pdf',
-        'Aslaner M. Cybersecurity Strategies and Best Practices...2024.pdf',
-        'Crelin J. Principles of Cybersecurity 2024.pdf',
-        'Faisal J. Dark Web Secrets. Ethical Hacking and Cybersecurity...Ex-Hacker 2025.pdf',
-        'Kaushik K. Advanced Techniques and Applications of Cybersecurity & Forensics 2025.pdf',
-        'CybersecurityFundamental - Oppos Class.pdf'
-      ];
-      const currentHash = this.hashManifest({ documents: fileList });
+      // Get current manifest hash
+      const manifestResponse = await fetch('/documents/manifest.json');
+      if (!manifestResponse.ok) {
+        return { needsUpdate: true };
+      }
+
+      const manifest = await manifestResponse.json();
+      const currentHash = this.hashManifest(manifest);
 
       // Check stored data
       const stored = this.loadFromStorage();
@@ -136,7 +125,7 @@ export class VectorDatabase {
 
       return { needsUpdate: false, currentHash };
     } catch (error) {
-      console.error('❌ Error checking update status:', error);
+      console.error('Error checking update status:', error);
       return { needsUpdate: true };
     }
   }

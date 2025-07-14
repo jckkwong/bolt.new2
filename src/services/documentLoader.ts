@@ -8,25 +8,6 @@ import * as pdfjs from 'pdfjs-dist';
 // Set up PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = '/node_modules/pdfjs-dist/build/pdf.worker.mjs';
 
-// Define list of files to process automatically
-const DOCUMENT_FILES = [
-  'Claude.docx',
-  'DeepSeek.docx', 
-  'Combined using Claude.docx',
-  'Combined using Gemini.docx',
-  'GPT.docx',
-  'Gemini.docx',
-  'Moller D. Guide to Cybersecurity in Digital Transformation...Best Practices 2023.pdf',
-  'Singh T. Digital Resilience, Cybersecurity and Supply Chains 2025.pdf',
-  'Dunham K. Cyber CISO Marksmanship. Hitting the Mark in Cybersecurity...2025.pdf',
-  'Baker D. A CISO Guide to Cyber Resilience. A how-to guide for every CISO...2024.pdf',
-  'Aslaner M. Cybersecurity Strategies and Best Practices...2024.pdf',
-  'Crelin J. Principles of Cybersecurity 2024.pdf',
-  'Faisal J. Dark Web Secrets. Ethical Hacking and Cybersecurity...Ex-Hacker 2025.pdf',
-  'Kaushik K. Advanced Techniques and Applications of Cybersecurity & Forensics 2025.pdf',
-  'CybersecurityFundamental - Oppos Class.pdf'
-];
-
 export class DocumentLoader {
   private vectorDb: VectorDatabase;
   private openaiService: OpenAIService;
@@ -37,38 +18,60 @@ export class DocumentLoader {
   }
 
   async loadPredefinedDocuments(): Promise<Document[]> {
-    console.log('🚀 Starting automatic vectorization of documents...');
+    console.log('Starting to load predefined documents...');
     
     const documents: Document[] = [];
+    
+    // Try to get list of documents from a manifest file first
+    let documentFiles: string[] = [];
+    
+    try {
+      const manifestResponse = await fetch('/documents/manifest.json');
+      if (manifestResponse.ok) {
+        const manifest = await manifestResponse.json();
+        documentFiles = manifest.documents || [];
+        console.log('Loaded manifest with documents:', documentFiles);
+      }
+    } catch (error) {
+      console.warn('Failed to load manifest, using fallback list:', error);
+      // Fallback to predefined list if manifest doesn't exist
+      documentFiles = [
+        'Claude.docx',
+        'DeepSeek.docx',
+        'Combined using Claude.docx',
+        'GPT.docx',
+        'Gemini.docx'
+      ];
+    }
 
     // Check if we need to update the vector database
     const { needsUpdate, currentHash } = await this.vectorDb.checkIfUpdateNeeded();
     
     if (!needsUpdate) {
-      console.log('📚 Vector database is up to date, skipping reload');
+      console.log('Vector database is up to date, skipping reload');
       // Still need to return document metadata for UI
-      return await this.getDocumentMetadata(DOCUMENT_FILES);
+      return await this.getDocumentMetadata(documentFiles);
     }
 
-    console.log('🔄 Vector database needs update, processing documents...');
+    console.log('Vector database needs update, loading documents...');
     
     // Clear existing data
     await this.vectorDb.clear();
 
-    console.log(`📄 Processing ${DOCUMENT_FILES.length} document files:`, DOCUMENT_FILES);
+    console.log('Processing document files:', documentFiles);
 
     try {
       // Process documents in parallel for faster loading
-      const documentPromises = DOCUMENT_FILES.map(async (filename) => {
+      const documentPromises = documentFiles.map(async (filename) => {
         try {
-          console.log(`📖 Processing: ${filename}`);
+          console.log(`Loading document: ${filename}`);
           const content = await this.loadDocumentContent(filename);
-          console.log(`📝 Text extracted from ${filename}: ${content.length} characters`);
+          console.log(`Content loaded for ${filename}, length: ${content.length}`);
           const document = await this.processDocument(filename, content);
-          console.log(`✅ Vectorized ${filename}: ${document.chunks} chunks`);
+          console.log(`Document processed: ${filename}, chunks: ${document.chunks}`);
           return document;
         } catch (error) {
-          console.error(`❌ Failed to process ${filename}:`, error);
+          console.error(`Failed to load document ${filename}:`, error);
           return null;
         }
       });
@@ -83,61 +86,66 @@ export class DocumentLoader {
         await this.vectorDb.finalizeBatch(currentHash);
       }
 
-      console.log(`✅ Vectorization complete: ${documents.length}/${DOCUMENT_FILES.length} documents processed successfully`);
-      console.log(`📊 Total chunks created: ${documents.reduce((sum, doc) => sum + doc.chunks, 0)}`);
-      
+      console.log(`Successfully loaded ${documents.length} documents`);
       return documents;
     } catch (error) {
-      console.error('❌ Error during vectorization:', error);
+      console.error('Error loading predefined documents:', error);
       throw new Error('Failed to load knowledge base documents');
     }
   }
 
   private async getDocumentMetadata(documentFiles?: string[]): Promise<Document[]> {
     // Return metadata for documents that are already loaded
-    const files = documentFiles || DOCUMENT_FILES;
-    
-    return files.map((filename: string, index: number) => ({
+    try {
+      let files = documentFiles;
+      if (!files) {
+        const manifestResponse = await fetch('/documents/manifest.json');
+        if (!manifestResponse.ok) {
+          return [];
+        }
+        const manifest = await manifestResponse.json();
+        files = manifest.documents || [];
+      }
+
+      return files.map((filename: string, index: number) => ({
         id: `cached_${index}`,
         name: filename,
         content: '', // Don't load full content for cached documents
         chunks: 0, // Will be updated from vector DB
         uploadedAt: new Date(),
         size: 0,
-    }));
+      }));
+    } catch {
+      return [];
+    }
   }
 
   private async loadDocumentContent(filename: string): Promise<string> {
-    console.log(`🔍 Fetching: /documents/${filename}`);
+    console.log(`Fetching document: /documents/${filename}`);
     const response = await fetch(`/documents/${filename}`);
     
     if (!response.ok) {
-      console.error(`❌ Failed to fetch ${filename}: ${response.status} ${response.statusText}`);
+      console.error(`Failed to fetch ${filename}: ${response.status} ${response.statusText}`);
       throw new Error(`Failed to load document: ${filename} (${response.status})`);
     }
 
     const extension = filename.toLowerCase().split('.').pop();
-    console.log(`🔧 Processing ${filename} as ${extension?.toUpperCase()} file`);
+    console.log(`Processing ${filename} as ${extension} file`);
     
     if (extension === 'docx') {
       // Handle Word documents
       const arrayBuffer = await response.arrayBuffer();
-      console.log(`📄 DOCX size: ${(arrayBuffer.byteLength / 1024).toFixed(1)} KB`);
-      
-      // Use mammoth to extract HTML then convert to text
-      const result = await mammoth.convertToHtml({ arrayBuffer });
-      const textContent = result.value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-      
-      console.log(`📝 Extracted ${textContent.length} characters from DOCX`);
+      console.log(`Extracting text from ${filename}, size: ${arrayBuffer.byteLength} bytes`);
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      console.log(`Extracted ${result.value.length} characters from ${filename}`);
       return result.value;
     } else if (extension === 'pdf') {
       // Handle PDF documents
       const arrayBuffer = await response.arrayBuffer();
-      console.log(`📄 PDF size: ${(arrayBuffer.byteLength / 1024).toFixed(1)} KB`);
+      console.log(`Extracting text from PDF ${filename}, size: ${arrayBuffer.byteLength} bytes`);
       
       try {
         const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-        console.log(`📖 PDF has ${pdf.numPages} pages`);
         let text = '';
         
         for (let i = 1; i <= pdf.numPages; i++) {
@@ -149,7 +157,7 @@ export class DocumentLoader {
           text += pageText + '\n';
         }
         
-        console.log(`📝 Extracted ${text.length} characters from PDF`);
+        console.log(`Extracted ${text.length} characters from PDF ${filename}`);
         
         if (!text || text.trim().length === 0) {
           throw new Error(`PDF ${filename} appears to be empty or contains no extractable text`);
@@ -157,27 +165,27 @@ export class DocumentLoader {
         
         return text;
       } catch (error) {
-        console.error(`❌ Error extracting text from PDF ${filename}:`, error);
+        console.error(`Error extracting text from PDF ${filename}:`, error);
         throw new Error(`Failed to extract text from PDF ${filename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     } else {
       // Handle text files
       const text = await response.text();
-      console.log(`📝 Loaded ${text.length} characters from text file`);
+      console.log(`Loaded ${text.length} characters from ${filename}`);
       return text;
     }
   }
 
   private async processDocument(filename: string, content: string): Promise<Document> {
-    console.log(`⚙️ Creating chunks for: ${filename}`);
+    console.log(`Processing document: ${filename}`);
     
     if (!content || content.trim().length === 0) {
       throw new Error(`Document ${filename} is empty or could not be read`);
     }
     
     try {
-      const chunks = this.chunkText(content, filename);
-      console.log(`📦 Created ${chunks.length} chunks (~500 tokens each)`);
+      const chunks = this.chunkText(content);
+      console.log(`Created ${chunks.length} chunks for ${filename}`);
       
       const document: Document = {
         id: this.generateId(),
@@ -191,7 +199,7 @@ export class DocumentLoader {
       // Generate embeddings for each chunk with rate limiting
       for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
-        console.log(`🧠 Generating embedding ${i + 1}/${chunks.length} for ${filename}`);
+        console.log(`Generating embedding for chunk ${i + 1}/${chunks.length} of ${filename}`);
         
         try {
           const embedding = await this.openaiService.generateEmbedding(chunk);
@@ -214,36 +222,36 @@ export class DocumentLoader {
             await new Promise(resolve => setTimeout(resolve, 100));
           }
         } catch (error) {
-          console.error(`❌ Failed to generate embedding for chunk ${i + 1} of ${filename}:`, error);
+          console.error(`Failed to generate embedding for chunk ${i} of ${filename}:`, error);
           throw error;
         }
       }
 
+      console.log(`Successfully processed ${filename} with ${chunks.length} chunks`);
       return document;
     } catch (error) {
-      console.error(`❌ Error processing document ${filename}:`, error);
+      console.error(`Error processing document ${filename}:`, error);
       throw new Error(`Failed to process document: ${filename}`);
     }
   }
 
-  private chunkText(text: string, filename: string): string[] {
-    console.log(`✂️ Chunking text (${text.length} chars) from ${filename}`);
+  private chunkText(text: string): string[] {
+    console.log(`Chunking text of length: ${text.length}`);
     const chunks: string[] = [];
     
     // Clean the text first
     const cleanText = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     
-    // Aim for ~500 token chunks (roughly 2000 characters)
-    const targetChunkSize = 2000;
-    const sections = cleanText.split(/\n\s*\n/);
-    console.log(`📄 Split into ${sections.length} sections`);
+    // Split on section dividers or paragraphs
+    const sections = cleanText.split(/\n\s*\n/); // Split on double newlines (paragraphs)
+    console.log(`Split text into ${sections.length} sections`);
     
     for (const section of sections) {
       const trimmedSection = section.trim();
       if (trimmedSection.length < 50) continue; // Skip very short sections
       
       // If section is small enough, use as single chunk
-      if (trimmedSection.length <= targetChunkSize) {
+      if (trimmedSection.length <= config.rag.chunkSize) {
         chunks.push(trimmedSection);
         continue;
       }
@@ -258,7 +266,7 @@ export class DocumentLoader {
         
         const potentialChunk = currentChunk + (currentChunk ? '. ' : '') + trimmedSentence;
         
-        if (potentialChunk.length <= targetChunkSize) {
+        if (potentialChunk.length <= config.rag.chunkSize) {
           currentChunk = potentialChunk;
         } else {
           if (currentChunk) {
@@ -274,7 +282,7 @@ export class DocumentLoader {
     }
     
     const filteredChunks = chunks.filter(chunk => chunk.length > 50); // Filter out very short chunks
-    console.log(`📦 Final result: ${filteredChunks.length} chunks (~500 tokens each)`);
+    console.log(`Created ${filteredChunks.length} chunks after filtering`);
     return filteredChunks;
   }
 
