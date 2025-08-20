@@ -125,6 +125,57 @@ export function ChatInterface() {
       )}
 
       {/* Response Mode Selection */}
+      <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-6 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Response Detail:
+            </span>
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() => setResponseMode('quick')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  state.responseMode === 'quick'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600'
+                }`}
+              >
+                <div className="flex items-center space-x-1">
+                  <Zap className="w-3 h-3" />
+                  <span>Detailed Guide</span>
+                </div>
+              </button>
+              <button
+                onClick={() => setResponseMode('detailed')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  state.responseMode === 'detailed'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600'
+                }`}
+              >
+                <div className="flex items-center space-x-1">
+                  <FileText className="w-3 h-3" />
+                  <span>Training Manual</span>
+                </div>
+              </button>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+            {state.responseMode === 'quick' ? (
+              <>
+                <Zap className="w-3 h-3" />
+                <span>Step-by-step guides with examples</span>
+              </>
+            ) : (
+              <>
+                <FileText className="w-3 h-3" />
+                <span>Complete training manuals with templates</span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
       
       {/* Input Area */}
       <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6">

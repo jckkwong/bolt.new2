@@ -26,7 +26,7 @@ const initialState: AppState = {
   reasoning: null,
   vectorDbStatus: 'disconnected',
   documentCount: 0,
-  responseMode: 'detailed' as 'quick' | 'detailed',
+  responseMode: 'quick' as 'quick' | 'detailed',
   isAuthenticated: false,
   user: null,
 };
