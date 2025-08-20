@@ -251,7 +251,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 {(message as any).responseMode === 'quick' ? (
                   <>
                     <Zap className="w-3 h-3 mr-1" />
-                    Detailed Guide
+                    Answer
                   </>
                 ) : (
                   <>

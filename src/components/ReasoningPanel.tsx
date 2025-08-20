@@ -350,7 +350,7 @@ export function ReasoningPanel() {
                 <span className={`font-medium ${
                   state.responseMode === 'quick' ? 'text-green-600 dark:text-green-400' : 'text-purple-600 dark:text-purple-400'
                 }`}>
-                  {state.responseMode === 'quick' ? 'Detailed Guide' : 'Training Manual'}
+                  {state.responseMode === 'quick' ? 'Answer' : 'Training Manual'}
                 </span>
               </div>
               <div className="flex justify-between">

@@ -165,7 +165,7 @@ export function ChatInterface() {
             {state.responseMode === 'quick' ? (
               <>
                 <Zap className="w-3 h-3" />
-                <span>Step-by-step guides with examples</span>
+                <span>Direct answers with examples</span>
               </>
             ) : (
               <>

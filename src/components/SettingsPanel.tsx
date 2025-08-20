@@ -292,7 +292,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 </button>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Choose your preferred response style. Detailed Guides provide step-by-step instructions with examples. Training Manuals include comprehensive templates and checklists.
+                Choose your preferred response style. Answer provides direct responses with examples. Training Manuals include comprehensive templates and checklists.
               </p>
             </div>
           </div>
