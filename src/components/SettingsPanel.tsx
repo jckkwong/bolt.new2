@@ -278,7 +278,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600'
                   }`}
                 >
-                  Guides
+                  Detailed Guides
                 </button>
                 <button
                   onClick={() => setLocalSettings({ ...localSettings, defaultResponseMode: 'detailed' })}
@@ -292,7 +292,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 </button>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Choose your preferred response style. Guides provide step-by-step instructions with examples. Training Manuals include comprehensive templates and checklists.
+                Choose your preferred response style. Detailed Guides provide step-by-step instructions with examples. Training Manuals include comprehensive templates and checklists.
               </p>
             </div>
           </div>
