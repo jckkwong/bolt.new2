@@ -343,7 +343,7 @@ export function ReasoningPanel() {
                   <span className="font-medium text-purple-600 dark:text-purple-400">
                     Multi-Agent Training
                   </span>
-                    {state.responseMode === 'quick' ? 'Guide' : 'Training Manual'}
+                </div>
               )}
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Response Type:</span>
