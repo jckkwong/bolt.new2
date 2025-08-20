@@ -315,29 +315,16 @@ export function useRAG() {
       let response: string;
       let reasoning: ReasoningData;
       
-      if (state.responseMode === 'quick') {
-        const result = await oai.generateQuickResponse(
-          [...recentMessages, userMessage],
-          context,
-          {
-            temperature: state.settings.temperature,
-            maxTokens: Math.max(state.settings.maxTokens, 2000), // Ensure enough tokens for detailed guides
-          }
-        );
-        response = result.response;
-        reasoning = result.reasoning;
-      } else {
-        const result = await oai.generateDetailedResponse(
-          [...recentMessages, userMessage],
-          context,
-          {
-            temperature: state.settings.temperature,
-            maxTokens: Math.max(state.settings.maxTokens * 3, 6000), // Ensure significantly more tokens for comprehensive training manuals
-          }
-        );
-        response = result.response;
-        reasoning = result.reasoning;
-      }
+      const result = await oai.generateDetailedResponse(
+        [...recentMessages, userMessage],
+        context,
+        {
+          temperature: state.settings.temperature,
+          maxTokens: Math.max(state.settings.maxTokens * 3, 6000), // Use maximum tokens for comprehensive training manuals
+        }
+      );
+      response = result.response;
+      reasoning = result.reasoning;
 
       const updatedReasoning = {
         ...reasoning,
@@ -356,12 +343,12 @@ export function useRAG() {
 
       dispatch({ type: 'SET_REASONING', payload: updatedReasoning });
 
-      const assistantMessage: Message & { responseMode?: 'quick' | 'detailed' } = {
+      const assistantMessage: Message & { responseMode?: 'detailed' } = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: response,
         timestamp: new Date(),
-        responseMode: state.responseMode,
+        responseMode: 'detailed',
       };
 
       dispatch({ type: 'ADD_MESSAGE', payload: assistantMessage });

@@ -79,6 +79,6 @@ export type AppAction =
   | { type: 'SET_REASONING'; payload: ReasoningData | null }
   | { type: 'SET_VECTOR_DB_STATUS'; payload: 'connected' | 'disconnected' | 'error' | 'initializing' }
   | { type: 'SET_DOCUMENT_COUNT'; payload: number }
-  | { type: 'SET_RESPONSE_MODE'; payload: 'quick' | 'detailed' }
+  | { type: 'SET_RESPONSE_MODE'; payload: 'detailed' }
   | { type: 'LOGIN'; payload: { username: string } }
   | { type: 'LOGOUT' };
