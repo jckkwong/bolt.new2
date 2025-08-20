@@ -262,37 +262,16 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           {/* Response Mode Settings */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              Response Preferences
+              Response Mode
             </h3>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Default Response Mode
-              </label>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setLocalSettings({ ...localSettings, defaultResponseMode: 'quick' })}
-                  className={`px-3 py-2 text-sm rounded-md transition-colors ${
-                    localSettings.defaultResponseMode === 'quick'
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  Detailed Guides
-                </button>
-                <button
-                  onClick={() => setLocalSettings({ ...localSettings, defaultResponseMode: 'detailed' })}
-                  className={`px-3 py-2 text-sm rounded-md transition-colors ${
-                    localSettings.defaultResponseMode === 'detailed'
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  Training Manuals
-                </button>
+            <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <FileText className="w-4 h-4 text-purple-600" />
+                <span className="font-medium text-purple-800 dark:text-purple-200">Training Manual Mode</span>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Choose your preferred response style. Answer provides direct responses with examples. Training Manuals include comprehensive templates and checklists.
+              <p className="text-sm text-purple-700 dark:text-purple-300">
+                All responses will be comprehensive training manuals with detailed examples, step-by-step guides, templates, and extensive learning materials designed for junior staff.
               </p>
             </div>
           </div>
