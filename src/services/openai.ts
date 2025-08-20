@@ -202,17 +202,56 @@ Use markdown checkboxes (- [ ]) to list comprehensive verification items:
 - Suggested phases for implementation
 - Dependencies and prerequisites
 - Estimated timeframes
-- Related documentation
-
+- Related documentation`,
+      };
 
       const conversationMessages = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content,
+      }));
+
       const response = await fetch(`${this.baseURL}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`,
         },
+        body: JSON.stringify({
+          model: config.openai.chatModel,
+          messages: [systemMessage, ...conversationMessages],
+          temperature: settings.temperature,
           max_tokens: settings.maxTokens,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || 'Failed to generate detailed response');
       }
+
+      const data = await response.json();
+      const responseText = data.choices[0].message.content;
+
       const reasoning: ReasoningData = {
+        retrievedChunks: context && !context.includes('No specific context available') ? [
+          {
+            content: context.substring(0, 200) + '...',
+            source: 'Knowledge Base',
+            similarity: 0.85,
           }
+        ] : [{
+          content: 'No knowledge base context available',
+          source: 'General AI Knowledge',
+          similarity: 0,
         }],
+        processingTime: Date.now(),
+        tokensUsed: data.usage?.total_tokens || 0,
+        model: config.openai.chatModel,
+        orchestrationMode: false,
+      };
+
+      return {
+        response: responseText,
         reasoning,
       };
     } catch (error) {
@@ -227,18 +266,18 @@ Use markdown checkboxes (- [ ]) to list comprehensive verification items:
     }
 
     try {
-      const response = await fetch(`${this.baseURL}/chat/completions`, {
+      const response = await fetch(\`${this.baseURL}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
+          'Authorization': \`Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
           model: config.openai.chatModel,
           messages: [
             {
               role: 'system',
-              content: `You are a query orchestrator that breaks down complex questions about AI models into focused subtopics for parallel research.
+              content: \`You are a query orchestrator that breaks down complex questions about AI models into focused subtopics for parallel research.
 
 Your task is to analyze the user's question and decompose it into 3-7 specific, focused subtopics that can be researched independently. Each subtopic should:
 - Be specific and actionable for information retrieval
@@ -314,14 +353,14 @@ Example:
         const chunks = result.chunks
           .map(chunk => `[Source: ${chunk.source}] ${chunk.content}`)
           .join('\n\n');
-        return `## ${result.subtopic}\n${chunks}`;
+        return \`## ${result.subtopic}\n${chunks}`;
       })
       .join('\n\n---\n\n');
 
     try {
       const systemMessage = {
         role: 'system' as const,
-        content: `You are an expert cybersecurity and AI knowledge tutor creating detailed step-by-step guides from multiple research subtopics.
+        content: \`You are an expert cybersecurity and AI knowledge tutor creating detailed step-by-step guides from multiple research subtopics.
 
 Create a comprehensive guide that includes:
 
@@ -357,11 +396,11 @@ TONE: Write as if coaching a junior employee through their first time. Be thorou
         content: msg.content,
       }));
 
-      const response = await fetch(`${this.baseURL}/chat/completions`, {
+      const response = await fetch(\`${this.baseURL}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
+          'Authorization': \`Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
           model: config.openai.chatModel,
@@ -402,16 +441,16 @@ TONE: Write as if coaching a junior employee through their first time. Be thorou
     const combinedContext = subtopicResults
       .map(result => {
         const chunks = result.chunks
-          .map((chunk, index) => `### Source ${index + 1}: ${chunk.source}\n${chunk.content}\n**Relevance Score:** ${(chunk.similarity * 100).toFixed(1)}%`)
+          .map((chunk, index) => \`### Source ${index + 1}: ${chunk.source}\n${chunk.content}\n**Relevance Score:** ${(chunk.similarity * 100).toFixed(1)}%`)
           .join('\n\n');
-        return `# Research Area: ${result.subtopic}\n\n${chunks}`;
+        return \`# Research Area: ${result.subtopic}\n\n${chunks}`;
       })
       .join('\n\n---\n\n');
 
     try {
       const systemMessage = {
         role: 'system' as const,
-        content: `You are an expert cybersecurity and AI knowledge tutor creating comprehensive training manuals for junior security and sales staff from multiple research subtopics.
+        content: \`You are an expert cybersecurity and AI knowledge tutor creating comprehensive training manuals for junior security and sales staff from multiple research subtopics.
 
 Create a detailed training manual that includes:
 
@@ -476,11 +515,11 @@ TONE: Write as a comprehensive instructor manual. Be extremely thorough, patient
         content: msg.content,
       }));
 
-      const response = await fetch(`${this.baseURL}/chat/completions`, {
+      const response = await fetch(\`${this.baseURL}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
+          'Authorization': \`Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
           model: config.openai.chatModel,
@@ -511,7 +550,7 @@ TONE: Write as a comprehensive instructor manual. Be extremely thorough, patient
     }
 
     try {
-      const response = await fetch(`${this.baseURL}/models`, {
+      const response = await fetch(\`${this.baseURL}/models`, {
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
         },
