@@ -97,7 +97,7 @@ export function ReasoningPanel() {
                     state.reasoning.currentStep === 'complete' ? 'text-green-600' :
                     'text-gray-500'
                   }`}>
-                    {state.responseMode === 'quick' ? 'Creating Detailed Guide' : 'Building Training Manual'}
+                    Building Training Manual
                   </span>
                 </div>
                 <div className="flex items-center space-x-3">
@@ -221,13 +221,9 @@ export function ReasoningPanel() {
             {state.reasoning.synthesisContext && (
               <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
                 <div className="flex items-center space-x-2 mb-3">
-                  {state.responseMode === 'quick' ? (
-                    <Zap className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <FileSearch className="w-4 h-4 text-purple-600" />
-                  )}
+                  <FileSearch className="w-4 h-4 text-purple-600" />
                   <h3 className="font-medium text-gray-900 dark:text-white">
-                    {state.responseMode === 'quick' ? 'Guide Creation Process' : 'Manual Creation Process'}
+                    Manual Creation Process
                   </h3>
                 </div>
                 <p className="text-sm text-gray-700 dark:text-gray-300">
@@ -347,10 +343,8 @@ export function ReasoningPanel() {
               )}
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Response Type:</span>
-                <span className={`font-medium ${
-                  state.responseMode === 'quick' ? 'text-green-600 dark:text-green-400' : 'text-purple-600 dark:text-purple-400'
-                }`}>
-                  {state.responseMode === 'quick' ? 'Detailed Guide' : 'Training Manual'}
+                <span className="font-medium text-purple-600 dark:text-purple-400">
+                  Training Manual
                 </span>
               </div>
               <div className="flex justify-between">

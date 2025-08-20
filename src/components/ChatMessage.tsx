@@ -241,27 +241,6 @@ export function ChatMessage({ message }: ChatMessageProps) {
         {/* Message Content */}
         <div className={`relative ${isUser ? 'text-right' : 'text-left'}`}>
           {/* Response Type Badge for AI messages */}
-          {!isUser && (message as any).responseMode && (
-            <div className="mb-2">
-              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                (message as any).responseMode === 'quick'
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                  : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
-              }`}>
-                {(message as any).responseMode === 'quick' ? (
-                  <>
-                    <Zap className="w-3 h-3 mr-1" />
-                    Detailed Guide
-                  </>
-                ) : (
-                  <>
-                    <FileText className="w-3 h-3 mr-1" />
-                    Training Manual
-                  </>
-                )}
-              </span>
-            </div>
-          )}
           
           <div className={`inline-block px-6 py-4 rounded-2xl shadow-sm ${
             isUser
@@ -282,14 +261,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
           </div>
           
           {/* Download option for detailed reports */}
-          {!isUser && (message as any).responseMode === 'detailed' && (
+          {!isUser && (
             <div className="mt-2">
               <button
                 onClick={() => downloadReport(message.content, `analysis-report-${message.timestamp.toISOString().split('T')[0]}`)}
                 className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center space-x-1"
               >
                 <Download className="w-3 h-3" />
-                <span>Download Report</span>
+                <span>Download Training Manual</span>
               </button>
             </div>
           )}
