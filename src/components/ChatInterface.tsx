@@ -142,7 +142,7 @@ export function ChatInterface() {
               >
                 <div className="flex items-center space-x-1">
                   <Zap className="w-3 h-3" />
-                  <span>Detailed Guide</span>
+                  <span>Step-by-step guides with examples</span>
                 </div>
               </button>
               <button
