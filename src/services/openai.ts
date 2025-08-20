@@ -189,104 +189,30 @@ ${context}`}
 
 Create a comprehensive training manual that includes:
 
-## Summary
-- Brief overview of what the user will learn to accomplish (1-2 sentences)
-
-## Step-by-Step Instructions
-Provide numbered steps (1., 2., 3., etc.) with comprehensive explanations for each step:
-- What to do specifically (with exact actions and commands)
-- Why this step is important (context, security implications, business impact)
 - How to perform the action (detailed instructions with screenshots descriptions)
 - What to expect as a result (outcomes, indicators, success criteria)
-- Common pitfalls to avoid and troubleshooting tips
-- Best practices and security considerations
-
-## Verification Checklist
 Use markdown checkboxes (- [ ]) to list comprehensive verification items:
 - Technical configuration points
-- Security validation steps
-- Quality assurance checks
-- Compliance requirements
 - Performance indicators
-
-## Example Scenario
-Provide a detailed, realistic example showing how a junior staff member would apply these steps:
 - Character background and role
-- Specific situation and requirements
-- Step-by-step application with realistic details
-- Challenges encountered and how they were resolved
 - Final outcomes and lessons learned
-
-## Templates and Artifacts
-When applicable, provide templates for:
 - Configuration files with detailed comments
 - Report templates with section descriptions
-- Checklists for ongoing maintenance
-- Documentation templates
-- Communication templates for stakeholders
-
 ## Implementation Timeline
 - Suggested phases for implementation
 - Dependencies and prerequisites
 - Estimated timeframes
-- Resource requirements
-
-## Additional Resources
 - Related documentation
-- Training materials
-- Tools and utilities
-- Contact information for support
 
-TONE: Write as a comprehensive instructor manual. Be extremely thorough, patient, and encouraging. Assume the reader is learning this for the first time. Include practical wisdom and real-world insights throughout.`,
-      };
 
       const conversationMessages = messages.map(msg => ({
-        role: msg.role,
-        content: msg.content,
-      }));
-
       const response = await fetch(`${this.baseURL}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
         },
-        body: JSON.stringify({
-          model: config.openai.chatModel,
-          messages: [systemMessage, ...conversationMessages],
-          temperature: settings.temperature,
           max_tokens: settings.maxTokens,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || 'Failed to generate detailed response');
       }
-
-      const data = await response.json();
-      const responseText = data.choices[0].message.content;
-
       const reasoning: ReasoningData = {
-        retrievedChunks: context && !context.includes('No specific context available') ? [
-          {
-            content: context.substring(0, 200) + '...',
-            source: 'Knowledge Base',
-            similarity: 0.85,
           }
-        ] : [{
-          content: 'No knowledge base context available',
-          source: 'General AI Knowledge', 
-          similarity: 0,
         }],
-        processingTime: Date.now(),
-        tokensUsed: data.usage?.total_tokens || 0,
-        model: config.openai.chatModel,
-        orchestrationMode: false,
-      };
-
-      return {
-        response: responseText,
         reasoning,
       };
     } catch (error) {
