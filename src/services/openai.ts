@@ -676,7 +676,7 @@ TONE AND APPROACH:
           model: config.openai.chatModel,
           messages: [systemMessage, ...conversationMessages],
           temperature: settings.temperature,
-          max_tokens: Math.max(settings.maxTokens, 4000),
+          max_tokens: Math.max(settings.maxTokens * 3, 6000),
         }),
       });
 

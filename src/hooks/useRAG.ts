@@ -332,7 +332,7 @@ export function useRAG() {
           context,
           {
             temperature: state.settings.temperature,
-            maxTokens: Math.max(state.settings.maxTokens * 2, 4000), // Ensure enough tokens for training manuals
+            maxTokens: Math.max(state.settings.maxTokens * 3, 6000), // Ensure significantly more tokens for comprehensive training manuals
           }
         );
         response = result.response;
